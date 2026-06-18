@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Distance, Speed, Time & Quiz</title>
+
+    <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --border-radius: 8px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .lang-switcher {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .lang-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .lang-btn:hover {
+            background: var(--accent-color);
+        }
+
+        .rtl { direction: rtl; text-align: right; }
+        .ltr { direction: ltr; text-align: left; }
+
+        .unit-fix {
+            direction: ltr;
+            display: inline-block;
+        }
+
+        h1, h2, h3 { color: var(--primary-color); }
+
+        .triangle-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 30px 0;
+        }
+
+        .dst-triangle {
+            width: 0;
+            height: 0;
+            border-left: 120px solid transparent;
+            border-right: 120px solid transparent;
+            border-bottom: 200px solid #ecf0f1;
+            position: relative;
+        }
+
+        .triangle-text {
+            position: absolute;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .text-d { top: 110px; left: -10px; color: #e74c3c; }
+        .text-s { top: 160px; left: -60px; color: #2ecc71; }
+        .text-t { top: 160px; left: 40px; color: #3498db; }
+
+        .horizontal-line {
+            position: absolute;
+            width: 160px;
+            height: 4px;
+            background-color: var(--primary-color);
+            top: 150px;
+            left: -80px;
+        }
+
+        .vertical-line {
+            position: absolute;
+            width: 4px;
+            height: 50px;
+            background-color: var(--primary-color);
+            top: 150px;
+            left: -2px;
+        }
+
+        .calculator, .quiz-section, .theory-box {
+            background: #f9f9f9;
+            padding: 20px;
+            border-left: 5px solid var(--accent-color);
+            border-radius: var(--border-radius);
+            margin-top: 25px;
+        }
+        
+        .rtl.calculator, .rtl.quiz-section, .rtl.theory-box {
+            border-left: none;
+            border-right: 5px solid var(--accent-color);
+        }
+
+        .calc-row { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        button.action-btn { background: var(--accent-color); color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; width: 100%; font-size: 1rem; font-weight: bold; }
+        button.action-btn:hover { background: var(--primary-color); }
+        
+        button.check-btn { 
+            background: #27ae60; 
+            color: white; 
+            border: none; 
+            padding: 6px 14px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-weight: bold;
+            margin-top: 10px;
+            margin-right: 5px;
+        }
+        button.check-btn:hover { background: #219653; }
+        
+        .rtl button.check-btn {
+            margin-right: 0;
+            margin-left: 5px;
+        }
+
+        #result, #quiz-summary { margin-top: 15px; font-weight: bold; font-size: 1.1rem; }
+
+        .quiz-item {
+            background: #fff;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+        }
+        .options-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .option-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #f4f7f6;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+        .option-label:hover { background: #e8eceb; }
+        .hint-btn {
+            background: none;
+            border: none;
+            color: var(--accent-color);
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 0;
+            margin-top: 5px;
+            text-decoration: underline;
+            margin-inline-start: 10px;
+        }
+        .hint-text {
+            display: none;
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            font-style: italic;
+            margin-top: 5px;
+        }
+        
+        .feedback-box {
+            display: none;
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .feedback-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .correct-ans { background: #d4edda !important; border-color: #c3e6cb !important; }
+        .wrong-ans { background: #f8d7da !important; border-color: #f5c6cb !important; }
+    </style>
+</head>
+<body>
+
+<div class="container ltr" id="main-container">
+    
+    <div class="lang-switcher">
+        <button class="lang-btn" onclick="switchLang('en')">EN</button>
+        <button class="lang-btn" onclick="switchLang('he')">עברית</button>
+        <button class="lang-btn" onclick="switchLang('ar')">عربي</button>
+        <button class="lang-btn" onclick="switchLang('ru')">РУС</button>
+    </div>
+
+    <h1 id="title">Distance, Speed, and Time</h1>
+    
+    <section>
+        <h2 id="hist-title">History & Motivation</h2>
+        <p id="hist-desc">Since ancient times, tracking movement has been crucial for survival, trade, and astronomy. Early humans needed to estimate travel time between resources. The formalization of these concepts solidified with Galileo Galilei and Sir Isaac Newton in the 17th century, paving the way for classical mechanics.</p>
+    </section>
+
+    <section>
+        <h2 id="triangle-title">The Formula Triangle</h2>
+        <p id="triangle-desc">The magic triangle helps you easily remember how to arrange the formula based on the variable you need to calculate.</p>
+        
+        <div class="triangle-container">
+            <div class="dst-triangle">
+                <div class="horizontal-line"></div>
+                <div class="vertical-line"></div>
+                <div class="triangle-text text-d">Distance (D)</div>
+                <div class="triangle-text text-s">Speed (S)</div>
+                <div class="triangle-text text-t">Time (T)</div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2 id="guide-title">When to use which?</h2>
+        <ul>
+            <li id="guide-d"><strong>To find Distance (D):</strong> Cover D, leaving Speed &times; Time. Use this when you know how fast and for how long something moved. Formula: D = Speed &times; Time</li>
+            <li id="guide-s"><strong>To find Speed (S):</strong> Cover S, leaving Distance / Time. Use this when you know the total ground covered and the time it took. Formula: Speed = Distance / Time</li>
+            <li id="guide-t"><strong>To find Time (T):</strong> Cover T, leaving Distance / Speed. Use this when you know the distance to travel and your fixed speed rate. Formula: Time = Distance / Speed</li>
+        </ul>
+    </section>
+
+    <section class="theory-box" id="conv-section">
+        <h2 id="conv-title">Speed Unit Conversion (km/h to m/s)</h2>
+        <p id="conv-desc">Often in physics and real-world math, we must convert speed units between kilometers per hour (km/h) and meters per second (m/s). Here is how the math rules work:</p>
+        <ul>
+            <li id="conv-rule1">There are 1000 meters in 1 kilometer, and 3600 seconds in 1 hour (60 min &times; 60 sec).</li>
+            <li id="conv-rule2">Therefore: 1 km/h = 1000m / 3600s = 1 / 3.6 m/s</li>
+            <li id="conv-shortcut"><strong>The Magic Shortcut Factor (3.6):</strong></li>
+            <ul>
+                <li id="conv-to-ms">To convert from <strong>km/h to m/s</strong>: <strong>Divide</strong> by 3.6. <br><em>Example:</em> 90 km/h / 3.6 = 25 m/s</li>
+                <li id="conv-to-kmh">To convert from <strong>m/s to km/h</strong>: <strong>Multiply</strong> by 3.6. <br><em>Example:</em> 10 m/s &times; 3.6 = 36 km/h</li>
+            </ul>
+        </ul>
+    </section>
+
+    <section class="calculator" id="calc-section">
+        <h2 id="calc-title">Interactive Calculator</h2>
+        <p id="calc-instruction">Leave the field empty that you want to calculate!</p>
+        <div class="calc-row">
+            <label id="lbl-d" for="input-d">Distance (D):</label>
+            <input type="number" id="input-d" step="any" placeholder="e.g. 100">
+        </div>
+        <div class="calc-row">
+            <label id="lbl-s" for="input-s">Speed (S):</label>
+            <input type="number" id="input-s" step="any" placeholder="e.g. 50">
+        </div>
+        <div class="calc-row">
+            <label id="lbl-t" for="input-t">Time (T):</label>
+            <input type="number" id="input-t" step="any" placeholder="e.g. 2">
+        </div>
+        <button class="action-btn" id="btn-calculate" onclick="calculateDST()">Calculate</button>
+        <div id="result"></div>
+    </section>
+
+    <section class="quiz-section" id="quiz-root">
+        <h2 id="quiz-title">Knowledge Check (20 Questions)</h2>
+        <div id="quiz-container"></div>
+        <button class="action-btn" id="btn-submit-quiz" onclick="evaluateQuiz()">Submit Quiz</button>
+        <div id="quiz-summary"></div>
+    </section>
+</div>
+
+<script>
+    const translations = {
+        en: {
+            dir: 'ltr',
+            title: 'Distance, Speed, and Time',
+            histTitle: 'History & Motivation',
+            histDesc: 'Since ancient times, tracking movement has been crucial for survival, trade, and astronomy. Early humans needed to estimate travel time between resources. The formalization of these concepts solidified with Galileo Galilei and Sir Isaac Newton in the 17th century, paving the way for classical mechanics.',
+            triangleTitle: 'The Formula Triangle',
+            triangleDesc: 'The magic triangle helps you easily remember how to arrange the formula based on the variable you need to calculate.',
+            triangleD: 'Distance (D)',
+            triangleS: 'Speed (S)',
+            triangleT: 'Time (T)',
+            guideTitle: 'When to use which?',
+            guideD: '<strong>To find Distance (D):</strong> Cover D, leaving Speed &times; Time. Use this when you know how fast and for how long something moved. Formula: D = Speed &times; Time',
+            guideS: '<strong>To find Speed (S):</strong> Cover S, leaving Distance / Time. Use this when you know the total ground covered and the time it took. Formula: Speed = Distance / Time',
+            guideT: '<strong>To find Time (T):</strong> Cover T, leaving Distance / Speed. Use this when you know the distance to travel and your fixed speed rate. Formula: Time = Distance / Speed',
+            convTitle: 'Speed Unit Conversion (km/h to m/s)',
+            convDesc: 'Often in physics and real-world math, we must convert speed units between kilometers per hour (km/h) and meters per second (m/s). Here is how the math rules work:',
+            convRule1: 'There are 1000 meters in 1 kilometer, and 3600 seconds in 1 hour (60 min &times; 60 sec).',
+            convRule2: 'Therefore: 1 km/h = 1000m / 3600s = 1 / 3.6 m/s',
+            convShortcut: '<strong>The Magic Shortcut Factor (3.6):</strong>',
+            convToMs: 'To convert from <strong>km/h to m/s</strong>: <strong>Divide</strong> by 3.6. <br><em>Example:</em> 90 km/h / 3.6 = 25 m/s',
+            convToKmh: 'To convert from <strong>m/s to km/h</strong>: <strong>Multiply</strong> by 3.6. <br><em>Example:</em> 10 m/s &times; 3.6 = 36 km/h',
+            calcTitle: 'Interactive Calculator',
+            calcInstruction: 'Leave the field empty that you want to calculate!',
+            lblD: 'Distance (D):',
+            lblS: 'Speed (S):',
+            lblT: 'Time (T):',
+            btnCalc: 'Calculate',
+            errFill: 'Please leave exactly ONE field blank to calculate.',
+            resD: 'Calculated Distance = ',
+            resS: 'Calculated Speed = ',
+            resT: 'Calculated Time = ',
+            unitD: ' km',
+            unitS: ' km/h',
+            unitT: ' hours',
+            quizTitle: 'Knowledge Check (20 Questions)',
+            btnSubmitQuiz: 'Submit Quiz',
+            btnCheck: 'Check',
+            showHint: 'Show Hint',
+            scoreText: 'Your Score: ',
+            correctBadge: 'Correct!',
+            wrongBadge: 'Incorrect.',
+            questions: [
+                { q: "What does the letter D represent in the formula triangle?", o: ["Duration", "Distance", "Degree", "Delay"], a: 1, h: "It measures the amount of space between two points.", r: "D stands for Distance. It represents how much geographic ground an object covers during its movement." },
+                { q: "What does the letter S stand for?", o: ["Space", "Shift", "Speed", "Seconds"], a: 2, h: "It describes how quickly an object covers a distance.", r: "S stands for Speed, which is the rate at which an object covers distance over time." },
+                { q: "What does the letter T represent?", o: ["Temperature", "Tension", "Total", "Time"], a: 3, h: "It is measured in seconds, minutes, or hours.", r: "T stands for Time. It measures the dynamic duration over which the movement occurs." },
+                { q: "Which formula is correct to calculate Distance?", o: ["Distance = Speed &times; Time", "Distance = Speed / Time", "Distance = Time / Speed", "Distance = Speed + Time"], a: 0, h: "In the triangle, look at the position of Speed and Time at the bottom side by side.", r: "Distance = Speed &times; Time. In the structural triangle, because Speed and Time sit side-by-side at the bottom, they multiply together." },
+                { q: "Which formula is correct to calculate Speed?", o: ["Speed = Distance &times; Time", "Speed = Distance / Time", "Speed = Time / Distance", "Speed = Distance - Time"], a: 1, h: "Distance is at the top of the triangle, and Time is at the bottom.", r: "Speed = Distance / Time. Distance is at the apex (top) of the triangle, creating a fraction bar above Time." },
+                { q: "Which formula is correct to calculate Time?", o: ["Time = Distance &times; Speed", "Time = Speed / Distance", "Time = Distance / Speed", "Time = Speed - Distance"], a: 2, h: "Distance is divided by Speed.", r: "Time = Distance / Speed. Distance is at the top, acting as the numerator over Speed." },
+                { q: "If a car travels at a speed of 60 km/h for 2 hours, what is the distance?", o: ["30 km", "120 km", "62 km", "180 km"], a: 1, h: "Multiply speed by time.", r: "Using Distance = Speed &times; Time: 60 km/h &times; 2 hours = 120 km." },
+                { q: "A runner covers 20 km in 2 hours. What is their speed?", o: ["10 km/h", "40 km/h", "22 km/h", "5 km/h"], a: 0, h: "Divide total distance by total time.", r: "Using Speed = Distance / Time: 20 km / 2 hours = 10 km/h." },
+                { q: "How long will it take to travel 150 km at a constant speed of 50 km/h?", o: ["2 hours", "4 hours", "3 hours", "7500 hours"], a: 2, h: "Divide distance by speed.", r: "Using Time = Distance / Speed: 150 km / 50 km/h = 3 hours." },
+                { q: "If Speed increases while Time remains constant, what happens to Distance?", o: ["Decreases", "Increases", "Stays the same", "Becomes zero"], a: 1, h: "Moving faster for the exact same duration means covering more ground.", r: "Distance increases. Because Distance = Speed &times; Time, driving at a higher speed for the same duration means covering more ground." },
+                { q: "If you double your speed, what happens to the time required to travel the same distance?", o: ["It doubles", "It halves", "It stays the same", "It triples"], a: 1, h: "Speed and Time have an inverse proportional relationship.", r: "It halves. Speed and Time have an inverse proportional relationship. Moving twice as fast slashes travel duration by half." },
+                { q: "Which of the following is a standard unit for speed?", o: ["meters", "hours", "meters per second (m/s)", "kilograms"], a: 2, h: "It must combine a distance unit over a time unit.", r: "Meters per second (m/s). Speed must always express a unit of length divided by a unit of time duration." },
+                { q: "Who among these historical scientists helped formalize classical mechanics and movement rules?", o: ["Albert Einstein", "Sir Isaac Newton", "Marie Curie", "Charles Darwin"], a: 1, h: "Review the History section at the top.", r: "Sir Isaac Newton formulated the three core laws of motion which form the framework of classical mechanics." },
+                { q: "A cyclist travels 45 km at a speed of 15 km/h. Find the time.", o: ["3 hours", "4 hours", "30 mins", "600 mins"], a: 0, h: "Time = Distance / Speed", r: "Using Time = Distance / Speed: 45 km / 15 km/h = 3 hours." },
+                { q: "In the triangle formula representation, which variable is positioned at the top vertex?", o: ["Speed", "Time", "Distance", "Acceleration"], a: 2, h: "The roof or numerator of our structure.", r: "Distance sits at the top vertex, acting as the mathematical numerator over both Speed and Time." },
+                { q: "A train moves at 100 km/h for 0.5 hours. What distance does it travel?", o: ["200 km", "50 km", "100.5 km", "25 km"], a: 1, h: "Multiply the values together.", r: "Using Distance = Speed &times; Time: 100 km/h &times; 0.5 hours = 50 km." },
+                { q: "An airplane flies 1200 km in 2 hours. What is its average speed?", o: ["600 km/h", "2400 km/h", "1202 km/h", "300 km/h"], a: 0, h: "Divide distance by time.", r: "Using Speed = Distance / Time: 1200 km / 2 hours = 600 km/h." },
+                { q: "If Distance = 0, what must be true if time is greater than zero?", o: ["Speed is infinite", "Speed is zero", "Time is negative", "Speed is increasing"], a: 1, h: "No distance covered means no movement took place.", r: "Speed is zero. If you cover zero distance over a duration of time, it mathematically implies no physical displacement took place." },
+                { q: "To convert speed from km/h to m/s, what mathematical action should you take?", o: ["Multiply by 3.6", "Divide by 3.6", "Add 1000", "Subtract 3600"], a: 1, h: "Review the unit conversion section factor.", r: "Divide by 3.6. Converting km/h to smaller structural meters per second cuts your numerical rate down by exactly 3.6." },
+                { q: "Convert 20 m/s into kilometers per hour (km/h).", o: ["72 km/h", "5.5 km/h", "200 km/h", "60 km/h"], a: 0, h: "Multiply by 3.6.", r: "To shift from m/s upward to km/h, multiply by our factor: 20 m/s &times; 3.6 = 72 km/h." }
+            ]
+        },
+        he: {
+            dir: 'rtl',
+            title: 'מרחק, מהירות וזמן',
+            histTitle: 'היסטוריה ומוטיבציה',
+            histDesc: 'מאז ימי קדם, מעקב אחר תנועה היה חיוני להישרדות, מסחר ואסטרונומיה. בני האדם הראשונים נדרשו להעריך את זמני הנסיעה בין משאבים שונים. הפורמליזציה הפיזיקלית של מושגים אלו התגבשה בעיקר על ידי גלילאו גליליי וסר אייזק ניوتن במאה ה-17, וסללה את הדרך למכניקה הקלאסית.',
+            triangleTitle: 'משולש הנוסחה',
+            triangleDesc: 'משולש הקסם עוזר לכם לזכור בקלות כיצד לסדר את הנוסחה בהתאם למשתנה שאתם רוצים לחשב.',
+            triangleD: 'מרחק (D)',
+            triangleS: 'מהירות (S)',
+            triangleT: 'זמן (T)',
+            guideTitle: 'מתי להשתמש בכל אחד?',
+            guideD: '<strong>כדי למצוא מרחק (D):</strong> הסתירו את D, ונשארתם עם מהירות &times; זמן. השתמשו בזה כשאתם יודעים מהי המהירות וכמה זמן נמשכה התנועה. נוסחה: מרחק = מהירות &times; זמן',
+            guideS: '<strong>כדי למצוא מהירות (S):</strong> הסתירו את S, ונשארתם עם מרחק / זמן. השתמשו בזה כשאתם יודעים את סך המרחק שעברתם ואת הזמן שזה לקח. נוסחה: מהירות = מרחק / זמן',
+            guideT: '<strong>כדי למצוא זמן (T):</strong> הסתירו את T, ונשארתם עם מרחק / מהירות. השתמשו בזה כשאתם יודעים את המרחק שיש לעבור ואת מהירות התנועה הקבועה שלכם. נוסחה: זמן = מרחק / מהירות',
+            convTitle: 'המרת יחידות מהירות (קמ"ש ל- מטר/שנייה)',
+            convDesc: 'לעתים קרובות בפיזיקה ובמתמטיקה, עלינו להמיר יחידות מהירות בין קילומטרים לשעה (קמ"ש) ומטרים לשנייה (מ"ש). כך פועלים חוקי המתמטיקה:',
+            convRule1: 'ישנם 1000 מטרים בקילומטר אחד, ו-3600 שניות בשעה אחת (60 דקות &times; 60 שניות).',
+            convRule2: 'לכן: 1 קמ"ש = 1000 מטר / 3600 שניות = 1 / 3.6 מטר לשנייה',
+            convShortcut: '<strong>קיצור הדרך של מקדם הקסם (3.6):</strong>',
+            convToMs: 'כדי להמיר מ-<strong>קמ"ש ל-מ"ש</strong>: <strong>מחלקים</strong> ב-3.6. <br><em>דוגמה:</em> 90 קמ"ש / 3.6 = 25 מ"ש',
+            convToKmh: 'כדי להמיר מ-<strong>מ"ש ל-קמ"ש</strong>: <strong>מכפילים</strong> ב-3.6. <br><em>דוגמה:</em> 10 מ"ש &times; 3.6 = 36 קמ"ש',
+            calcTitle: 'מחשבון אינטראקטיבי',
+            calcInstruction: 'השאירו ריק את השדה שברצונכם לחשב!',
+            lblD: 'מרחק (D):',
+            lblS: 'מהירות (S):',
+            lblT: 'זמן (T):',
+            btnCalc: 'חשב',
+            errFill: 'אנא השאירו שדה אחד בלבד ריק כדי לחשב.',
+            resD: 'מרחק מחושב = ',
+            resS: 'מהירות מחושבת = ',
+            resT: 'זמן מחושב = ',
+            unitD: ' ק"מ',
+            unitS: ' קמ"ש',
+            unitT: ' שעות',
+            quizTitle: 'בחינת ידע (20 שאלות)',
+            btnSubmitQuiz: 'הגש בוחן',
+            btnCheck: 'בדיקה',
+            showHint: 'הצג רמז',
+            scoreText: 'הציון שלך: ',
+            correctBadge: 'נכון מאוד!',
+            wrongBadge: 'תשובה שגויה.',
+            questions: [
+                { q: "מה מייצגת האות D במשולש הנוסחה?", o: ["משך זמן", "מרחק", "מעלה", "עיכוב"], a: 1, h: "מודד את המרחב שבין שתי נקודות.", r: "האות D מייצגת מרחק (Distance). היא מודדת את אורך המסלול שגוף עבר." },
+                { q: "מה מייצגת האות S?", o: ["שטח", "הסטה", "מהירות", "שניות"], a: 2, h: "מתארת באיזה קצב גוף עובר מרחק מסוים.", r: "האות S מייצגת מהירות (Speed), שהיא קצב שינוי המרחק של הגוף ביחס לזמן." },
+                { q: "מה מייצגת האות T?", o: ["טמפרטורה", "מתח", "סך הכל", "זמן"], a: 3, h: "נמדד בשניות, דקות או שעות.", r: "האות T מייצגת זמן (Time). היא מודדת את משך התנועה." },
+                { q: "איזו נוסחה נכונה לחישוב מרחק?", o: ["מרחק = מהירות &times; זמן", "מרחק = מהירות / זמן", "מרחק = זמן / מהירות", "מרחק = מהירות + זמן"], a: 0, h: "במשולש, הסתכלו על המיקום של S ו-T זה לצד זה למטה.", r: "מרחק = מהירות &times; זמן. מאחר והמהירות והזמן נמצאים זה לצד זה בתחתית המשולש, נכפיל אותם." },
+                { q: "איזו נוסחה נכונה לחישוב מהירות?", o: ["מהירות = מרחק &times; זמן", "מהירות = מרחק / זמן", "מהירות = זמן / מרחק", "מהירות = מרחק - זמן"], a: 1, h: "המרחק נמצא בראש המשולש, והזמן בתחתית.", r: "מהירות = מרחק / זמן. המרחק נמצא בראש המשולש (במונה) מעל הזמן." },
+                { q: "איזו נוסחה נכונה לחישוב זמן?", o: ["זמן = מרחק &times; מהירות", "זמן = מהירות / מרחק", "זמן = מרחק / מהירות", "זמן = מהירות - מרחק"], a: 2, h: "מחלקים את המרחק במהירות.", r: "זמן = מרחק / מהירות. המרחק נמצא בראש המשולש ולכן הוא מחולק במהירות שנמצאת מתחתיו." },
+                { q: "אם מכונית נוסעת במהירות של 60 קמ\"ש במשך 2 שעות, מה המרחק?", o: ["30 ק\"מ", "120 ק\"מ", "62 ק\"מ", "180 ק\"מ"], a: 1, h: "כפלו מהירות בזמן.", r: "לפי הנוסחה: מרחק = מהירות &times; זמן. נקבל 60 כפול 2 שווה 120 ק\"מ." },
+                { q: "רץ עובר 20 ק\"מ ב-2 שעות. מהי מהירותו?", o: ["10 קמ\"ש", "40 קמ\"ש", "22 קמ\"ש", "5 קמ\"ש"], a: 0, h: "חלקו את סך המרחק בסך הזמן.", r: "לפי הנוסחה: מהירות = מרחק / זמן. נקבל 20 חלקי 2 שווה 10 קמ\"ש." },
+                { q: "כמה זמן ייקח לעבור 150 ק\"מ במהירות קבועה של 50 קמ\"ש?", o: ["2 שעות", "4 שעות", "3 שעות", "7500 שעות"], a: 2, h: "חלקו מרחק במהירות.", r: "לפי הנוסחה: זמן = מרחק / מהירות. נקבל 150 חלקי 50 שווה 3 שעות." },
+                { q: "אם מהירות (S) גדלה בעוד הזמן (T) נשאר קבוע, מה קורה למרחק (D)?", o: ["קטן", "גדל", "נשאר ללא שינוי", "הופך לאפס"], a: 1, h: "תנועה מהירה יותר באותו משך זמן פירושה מעבר מרחק גדול יותר.", r: "המרחק גדל. מכיוון שמרחק שווה מהירות כפול זמן, נסיעה במהירות גבוהה יותר באותו הזמן תגרום לנו לעבור מרחק גדול יותר." },
+                { q: "אם תכפילו את המהירות, מה יקרה לזמן הדרוש לעבור את אותו המרחק?", o: ["יגדל פי 2", "יקטן בחצי", "יישאר זהה", "יגדל פי 3"], a: 1, h: "בין מהירות לזמן יש יחס הפוך.", r: "הזמן יקטן בחצי. בין מהירות לזמן ישנו קשר הפוך - אם נעים מהר פי שניים, נגיע לחצי מהזמן." },
+                { q: "איזו מהיחידות הבאות היא יחידה סטנדרטית למהירות?", o: ["מטרים", "שעות", "מטרים לשנייה (מ/ש)", "קילוגרמים"], a: 2, h: "עליה לשלב יחידת מרחק חלקי יחידת זמן.", r: "מטרים לשנייה (מ/ש). יחידת מהירות חייבת תמיד להיות מורכבת מיחידת מרחק המחולקת ביחידת זמן." },
+                { q: "מי מהמדענים ההיסטוריים הבאים סייע בגיבוש המכניקה הקלאסית וחוקי התנועה?", o: ["אלברט איינשטיין", "סר אייזק ניوتن", "מארי קירי", "צ'ארלס דרווין"], a: 1, h: "עיינו בסעיף ההיסטוריה שבראש הדף.", r: "סר אייזק ניوتن ניסח את שלושת חוקי התנועה הבסיסיים המהווים את הבסיס למכניקה הקלאסิต." },
+                { q: "רוכב אופניים עובר 45 ק\"מ במהירות של 15 קמ\"ש. מצא את הזמן.", o: ["3 שעות", "4 שעות", "30 דקות", "600 דקות"], a: 0, h: "זמן = מרחק / מהירות", r: "לפי הנוסחה: זמן = מרחק / מהירות. נקבל 45 חלקי 15 שווה 3 שעות." },
+                { q: "במשולש הנוסחה, איזה משתנה ממוקם בקודקוד העליון?", o: ["מהירות", "זמן", "מרחק", "תאוצה"], a: 2, h: "הגורם שנמצא במונה המבנה.", r: "המרחק נמצא בקודקוד העליון של המשולש, והוא משמש כמונה הנוסחה מעל המהירות והזמן." },
+                { q: "רכבת נוסעת במהירות של 100 קמ\"ש במשך 0.5 שעה. איזה מרחק היא עוברת?", o: ["200 ק\"מ", "50 ק\"מ", "100.5 ק\"מ", "25 ק\"מ"], a: 1, h: "כפלו את הערכים זה בזה.", r: "לפי הנוסחה: מרחק = מהירות &times; זמן. נקבל 100 כפול 0.5 שווה 50 ק\"מ." },
+                { q: "מטוס טס 1200 ק\"מ ב-2 שעות. מהי מהירותו הממוצעת?", o: ["600 קמ\"ש", "2400 קמ\"ש", "1202 קמ\"ש", "300 קמ\"ש"], a: 0, h: "חלקו מרחק בזמן.", r: "לפי הנוסחה: מהירות = מרחק / זמן. נקבל 1200 חלקי 2 שווה 600 קמ\"ש." },
+                { q: "אם המרחק שווה לאפס (D = 0), מה נכון לומר במידה והזמן גדול מאפס?", o: ["המהירות אינסופית", "המהירות היא אפס", "הזמן שלילי", "המהירות גדله"], a: 1, h: "חוסר מעבר מרחק מעיד על כך שלא התרחשה תנועה.", r: "המהירות היא אפס. אם גוף לא עבר שום מרחק במשך זמן מסוים, המשמעות היא שהוא לא זז ממקומו." },
+                { q: "כדי להמיר מהירות מקמ\"ש למטר/שנייה, איזו פעולה מתמטית יש לבצע?", o: ["להכפיל ב-3.6", "לחלק ב-3.6", "להוסיף 1000", "להפחית 3600"], a: 1, h: "עיינו במקדם קיצור הדרך שמוסבר למעלה.", r: "לחלק ב-3.6. כדי לעבור מיחידה גדולה (קילומטר לשעה) ליחידה קטנה יותר (מטר לשנייה) אנו מחלקים ב-3.6." },
+                { q: "המירו מהירות של 20 מ\"ש ליחידות של קמ\"ש.", o: ["72 קמ\"ש", "5.5 קמ\"ש", "200 קמ\"ש", "60 קמ\"ש"], a: 0, h: "יש להכפיל את הערך ב-3.6.", r: "כדי לעבור ממטר לשנייה לקמ\"ש מכפילים במקדם: 20 כפול 3.6 שווה 72 קמ\"ש." }
+            ]
+        },
+        ar: {
+            dir: 'rtl',
+            title: 'المسافة، السرعة، والوقت',
+            histTitle: 'التاريخ والدوافع',
+            histDesc: 'منذ العصور القديمة، تتبع الحركة كان أمراً حيوياً للبقاء، والتجارة، وعلم الفلك.',
+            triangleTitle: 'مثلث الصيغة',
+            triangleDesc: 'يساعدك المثلث السحري على تذكر كيفية ترتيب الصيغة الرياضية.',
+            triangleD: 'المسافة (D)',
+            triangleS: 'السرعة (S)',
+            triangleT: 'الوقت (T)',
+            guideTitle: 'متى نستخدم كل واحد؟',
+            guideD: 'لإيجاد المسافة: اضرب السرعة في الوقت.',
+            guideS: 'لإيجاد السرعة: اقسم المسافة على الوقت.',
+            guideT: 'لإيجاد الوقت: اقسم المسافة على السرعة.',
+            convTitle: 'تحويل وحدات السرعة',
+            convDesc: 'الحسابات المعتمدة لتحويل السرعة بين كم/ساعة ومتر/ثانية.',
+            convRule1: '1 كيلومتر = 1000 متر. 1 ساعة = 3600 ثانية.',
+            convRule2: 'وبالتالي العامل المشترك هو 3.6.',
+            convShortcut: 'عامل الاختصار السحري (3.6):',
+            convToMs: 'من كم/ساعة إلى م/ث: اقسم على 3.6.',
+            convToKmh: 'من م/ث إلى كم/ساعة: اضرب في 3.6.',
+            calcTitle: 'حاسبة تفاعلية',
+            calcInstruction: 'اترك الحقل الذي تريد حسابه فارغاً!',
+            lblD: 'المسافة (D):',
+            lblS: 'السرعة (S):',
+            lblT: 'الوقت (T):',
+            btnCalc: 'احسب',
+            errFill: 'يرجى ترك حقل واحد فقط فارغاً.',
+            resD: 'المسافة المحسوبة = ',
+            resS: 'السرعة المحسوبة = ',
+            resT: 'الوقت المحسوب = ',
+            unitD: ' كم',
+            unitS: ' كم/ساعة',
+            unitT: ' ساعات',
+            quizTitle: 'اختبار المعرفة (20 سؤال)',
+            btnSubmitQuiz: 'إرسال الإجابات',
+            btnCheck: 'تحقق',
+            showHint: 'إظهار التلميح',
+            scoreText: 'نتيجتك: ',
+            correctBadge: 'إجابة صحيحة!',
+            wrongBadge: 'إجابة خاطئة.',
+            questions: [
+                { q: "ماذا يمثل الحرف D في مثلث الصيغة؟", o: ["المدة", "المسافة", "الدرجة", "التأخير"], a: 1, h: "يقيس مقدار المساحة بين نقطتين.", r: "D يعبر عن المسافة المقطوعة بين نقطتين." },
+                { q: "ماذا يمثل الحرف S؟", o: ["الفضاء", "الوردية", "السرعة", "الثواني"], a: 2, h: "يصف مدى سرعة قطع الجسم للمسافة.", r: "S يمثل السرعة الرياضية للحركة." },
+                { q: "ماذا يمثل الحرف T؟", o: ["درجة الحرارة", "الشد", "الإجمالي", "الوقت"], a: 3, h: "يُقاس بالثواني أو الدقائق أو الساعات.", r: "T هو الوقت المستغرق لإتمام الرحلة." },
+                { q: "أي صيغة هي الصحيحة لحساب المسافة؟", o: ["المسافة = السرعة &times; الوقت", "المسافة = السرعة / الوقت", "المسافة = الوقت / السرعة", "المسافة = السرعة + الوقت"], a: 0, h: "في المثلث، انظر إلى موقع السرعة والوقت بجانب بعضهما.", r: "المسافة = السرعة &times; الوقت." },
+                { q: "أي صيغة هي الصحيحة لحساب السرعة؟", o: ["السرعة = المسافة &times; الوقت", "السرعة = المسافة / الوقت", "السرعة = الوقت / المسافة", "السرعة = المسافة - الوقت"], a: 1, h: "المسافة في الجزء العلوي من المثلث.", r: "السرعة = المسافة / الوقت." },
+                { q: "أي صيغة هي الصحيحة لحساب الوقت؟", o: ["الوقت = المسافة &times; السرعة", "الوقت = السرعة / المسافة", "الوقت = المسافة / السرعة", "الوقت = السرعة - المسافة"], a: 2, h: "تقسيم المسافة على السرعة.", r: "الوقت = المسافة / السرعة." },
+                { q: "إذا سارت سيارة بسرعة 60 كم/ساعة لمدة 2 ساعة، فما هي المسافة؟", o: ["30 كم", "120 كم", "62 كم", "180 كم"], a: 1, h: "اضرب السرعة في الوقت.", r: "المسافة = 60 &times; 2 = 120 كم." },
+                { q: "قطع عداء مسافة 20 كم في 2 ساعة. ما هي سرعته؟", o: ["10 كم/ساعة", "40 كم/ساعة", "22 كم/ساعة", "5 كم/ساعة"], a: 0, h: "اقسم إجمالي المسافة على إجمالي الوقت.", r: "السرعة = 20 / 2 = 10 كم/ساعة." },
+                { q: "كم من الوقت سيستغرق قطع مسافة 150 كم بسرعة ثابتة تبلغ 50 كم/ساعة؟", o: ["2 ساعة", "4 ساعات", "3 ساعات", "7500 ساعة"], a: 2, h: "اقسم المسافة على السرعة.", r: "الوقت = 150 / 50 = 3 ساعات." },
+                { q: "إذا زادت السرعة بينما ظل الوقت ثابتاً، فماذا يحدث للمسافة؟", o: ["تقل", "تزداد", "تبقى كما هي", "تصبح صفراً"], a: 1, h: "التحرك بشكل أسرع لنفس المدة يعني قطع مسافة أكبر.", r: "تزداد المسافة بزيادة السرعة التناسبية الطردية." },
+                { q: "إذا ضاعفت سرعتك، فماذا يحدث للوقت المطلوب لقطع نفس المسافة؟", o: ["يتضاعف", "ينخفض إلى النصف", "يبقى كما هي", "يتضاعف ثلاث مرات"], a: 1, h: "العلاقة بين السرعة والوقت هي علاقة عكسية.", r: "ينخفض إلى النصف بسبب العلاقة العكسية المقترنة." },
+                { q: "أي مما يلي يعد وحدة قياسية للسرعة؟", o: ["أمتار", "ساعات", "متر في الثانية (م/ث)", "كيلوغرامات"], a: 2, h: "يجب أن تجمع بين وحدة مسافة مقسومة على وحدة زمن.", r: "متر في الثانية (م/ث)." },
+                { q: "من من هؤلاء العلماء ساعد في صياغة الميكانيكا الكلاسيكية وقواعد الحركة؟", o: ["ألبرت أينشتاين", "إسحاق نيوتن", "ماري كوري", "تشارلز داروين"], a: 1, h: "راجع قسم التاريخ في الجزء العلوي.", r: "إسحاق نيوتن هو واضع قوانين الحركة الثلاثة الشهيرة." },
+                { q: "يقطع راكب دراجة مسافة 45 كم بسرعة 15 كم/ساعة. أوجد الوقت.", o: ["3 ساعات", "4 ساعات", "30 دقيقة", "600 دقيقة"], a: 0, h: "الوقت = المسافة / السرعة", r: "الوقت = 45 / 15 = 3 ساعات." },
+                { q: "في تمثيل صيغة المثلث، أي متغير يقع في الرأس العلوي؟", o: ["السرعة", "الوقت", "المسافة", "التسارع"], a: 2, h: "البسط أو سقف الهيكل لدينا.", r: "المسافة تقع دائماً في رأس المثلث العلوي كمقسوم." },
+                { q: "يتحرك قطار بسرعة 100 كم/ساعة لمدة 0.5 ساعة. ما المسافة التي يقطعها؟", o: ["200 كم", "50 كم", "100.5 كم", "25 كم"], a: 1, h: "اضرب القيم معاً.", r: "المسافة = 100 &times; 0.5 = 50 كم." },
+                { q: "تطير طائرة مسافة 1200 كم في 2 ساعة. ما هو متوسط سرعتها؟", o: ["600 كم/ساعة", "2400 كم/ساعة", "1202 كم/ساعة", "300 كم/ساعة"], a: 0, h: "اقسم المسافة على الوقت.", r: "السرعة = 1200 / 2 = 600 كم/ساعة." },
+                { q: "إذا كانت المسافة صفر، فما الذي يجب أن يكون صحيحاً إذا كان الوقت أكبر من الصفر؟", o: ["السرعة لانهائية", "السرعة صفر", "الوقت سالب", "السرعة تتزايد"], a: 1, h: "عدم قطع أي مسافة يعني عدم حدوث حركة.", r: "السرعة صفر نظراً لغياب الحركة والازاحة تماماً." },
+                { q: "لتحويل السرعة من كم/ساعة إلى م/ث, ما الإجراء الرياضي الذي يجب عليك اتخاذه؟", o: ["الضرب في 3.6", "القسمة على 3.6", "إضافة 1000", "طرح 3600"], a: 1, h: "القسمة على الثابت الرياضي المفسر.", r: "القسمة على 3.6." },
+                { q: "حوّل السرعة 20 م/ث إلى كيلومتر في الساعة (كم/ساعة).", o: ["72 كم/ساعة", "5.5 كم/ساعة", "200 كم/ساعة", "60 كم/ساعة"], a: 0, h: "اضرب في 3.6.", r: "20 &times; 3.6 = 72 كم/ساعة." }
+            ]
+        },
+        ru: {
+            dir: 'ltr',
+            title: 'Расстояние, Скорость и Время',
+            histTitle: 'История и мотивация',
+            histDesc: 'С древних времен отслеживание перемещений было жизненно важно для выживания, торговли и астрономии.',
+            triangleTitle: 'Треугольник формулы',
+            triangleDesc: 'Магический треугольник помогает легко запомнить формулу.',
+            triangleD: 'Расстояние (D)',
+            triangleS: 'Скорость (S)',
+            triangleT: 'Время (T)',
+            guideTitle: 'Когда что использовать?',
+            guideD: 'Чтобы найти Расстояние: Скорость &times; Время.',
+            guideS: 'Чтобы найти Скорость: Расстояние / Время.',
+            guideT: 'Чтобы найти Время: Расстояние / Скорость.',
+            convTitle: 'Перевод единиц скорости',
+            convDesc: 'Правила изменения размерности скорости.',
+            convRule1: 'В 1 км = 1000 метров, в 1 часе = 3600 секунд.',
+            convRule2: 'Магический коэффициент = 3.6.',
+            convShortcut: 'Коэффициент:',
+            convToMs: 'Из км/ч в м/с: Разделите на 3.6.',
+            convToKmh: 'Из м/с в км/ч: Умножьте на 3.6.',
+            calcTitle: 'Интерактивный калькулятор',
+            calcInstruction: 'Оставьте расчетное поле пустым!',
+            lblD: 'Расстояние (D):',
+            lblS: 'Скорость (S):',
+            lblT: 'Время (T):',
+            btnCalc: 'Вычислить',
+            errFill: 'Пожалуйста, оставьте ровно одно поле пустым.',
+            resD: 'Расстояние = ',
+            resS: 'Скорость = ',
+            resT: 'Время = ',
+            unitD: ' км',
+            unitS: ' км/ч',
+            unitT: ' ч.',
+            quizTitle: 'Проверка знаний (20 вопросов)',
+            btnSubmitQuiz: 'Сдать тест',
+            btnCheck: 'Проверить',
+            showHint: 'Показать подсказку',
+            scoreText: 'Ваш результат: ',
+            correctBadge: 'Верно!',
+            wrongBadge: 'Ошибка.',
+            questions: [
+                { q: "Что означает буква D в треугольнике формул?", o: ["Длительность", "Расстояние", "Градус", "Задержка"], a: 1, h: "Оно измеряет пространство между точками.", r: "D означает Расстояние (Distance)." },
+                { q: "Что означает буква S?", o: ["Пространство", "Сдвиг", "Скорость", "Секунды"], a: 2, h: "Оно описывает, насколько быстро объект преодолевает дистанцию.", r: "S означает Скорость (Speed)." },
+                { q: "Что означает буква T?", o: ["Температура", "Напряжение", "Всего", "Время"], a: 3, h: "Измеряется в секундах, минутах или часах.", r: "T означает Время (Time)." },
+                { q: "Какая формула верна для расчета Расстояния?", o: ["Расстояние = Скорость &times; Время", "Расстояние = Скорость / Время", "Расстояние = Время / Скорость", "Расстояние = Скорость + Время"], a: 0, h: "В треугольнике Скорость и Время находятся рядом внизу.", r: "Расстояние = Скорость &times; Время." },
+                { q: "Какая формула верна для расчета Скорости?", o: ["Скорость = Расстояние &times; Время", "Скорость = Расстояние / Время", "Скорость = Время / Расстояние", "Скорость = Расстояние - Время"], a: 1, h: "Расстояние находится вверху треугольника.", r: "Скорость = Расстояние / Время." },
+                { q: "Какая формула верна для расчета Времени?", o: ["Время = Расстояние &times; Скорость", "Время = Скорость / Расстояние", "Время = Расстояние / Скорость", "Время = Скорость - Расстояние"], a: 2, h: "Расстояние делится на Скорость.", r: "Время = Расстояние / Скорость." },
+                { q: "Если автомобиль движется со скоростью 60 км/ч в течение 2 часов, каково расстояние?", o: ["30 км", "120 км", "62 км", "180 км"], a: 1, h: "Умножьте скорость на время.", r: "Расстояние = 60 &times; 2 = 120 км." },
+                { q: "Бегун пробегает 20 км за 2 часа. Какова его скорость?", o: ["10 км/ч", "40 км/ч", "22 км/ч", "5 км/ч"], a: 0, h: "Разделите расстояние на время.", r: "Скорость = 20 / 2 = 10 км/ч." },
+                { q: "Сколько времени займет путь в 150 км при постоянной скорости 50 км/ч?", o: ["2 часа", "4 часа", "3 часа", "7500 часов"], a: 2, h: "Разделите расстояние на скорость.", r: "Время = 150 / 50 = 3 часа." },
+                { q: "Если Скорость увеличивается, а Время остается прежним, что происходит с Расстоянием?", o: ["Уменьшается", "Увеличивается", "Остается прежним", "Становится равным нулю"], a: 1, h: "Быстрое движение дает больший путь.", r: "Расстояние увеличивается." },
+                { q: "Если вы удвоите скорость, что произойдет со временем?", o: ["Удвоится", "Уменьшится вдвое", "Останется прежним", "Утроится"], a: 1, h: "Скорость и время обратно пропорциональны.", r: "Время уменьшится в два раза." },
+                { q: "Что из следующего является стандартной единицей измерения скорости?", o: ["метры", "часы", "метры в секунду (м/с)", "килограммы"], a: 2, h: "Расстояние деленное на время.", r: "Метры в секунду (м/с)." },
+                { q: "Кто из этих ученых помог формализовать механику движения?", o: ["Альберт Эйнштейн", "Сэр Исаак Ньютон", "Мария Кюри", "Чарльз Дарвин"], a: 1, h: "Посмотрите историю вверху.", r: "Сэр Исаак Ньютон создал классические законы динамики." },
+                { q: "Велосипедист едет 45 км со скоростью 15 км/ч. Найдите время.", o: ["3 часа", "4 часа", "30 минут", "600 минут"], a: 0, h: "Время = Расстояние / Скорость", r: "Время = 45 / 15 = 3 часа." },
+                { q: "В треугольнике формулы какая переменная расположена в самом верху?", o: ["Скорость", "Время", "Расстояние", "Ускорение"], a: 2, h: "Вершина нашей структуры.", r: "Расстояние находится на вершине пирамиды." },
+                { q: "Поезд движется со скоростью 100 км/ч в течение 0.5 часа. Какое расстояние он проедет?", o: ["200 км", "50 км", "100.5 км", "25 км"], a: 1, h: "Перемножьте значения.", r: "Расстояние = 100 &times; 0.5 = 50 км." },
+                { q: "Самолет пролетает 1200 км за 2 часа. Какова его средняя скорость?", o: ["600 км/ч", "2400 км/ч", "1202 км/ч", "300 км/ч"], a: 0, h: "Разделите расстояние на время.", r: "Скорость = 1200 / 2 = 600 км/ч." },
+                { q: "Если Расстояние = 0, а время больше нуля, то чему равна скорость?", o: ["Бесконечности", "Нулю", "Отрицательна", "Увеличивается"], a: 1, h: "Движения не было.", r: "Скорость равна нулю, так как тело покоится." },
+                { q: "Чтобы перевести скорость из км/ч в м/с, нужно:", o: ["Умножить на 3.6", "Разделить на 3.6", "Прибавить 1000", "Вычесть 3600"], a: 1, h: "Используйте коэффициент 3.6.", r: "Разделить на коэффициент 3.6." },
+                { q: "Переведите скорость 20 м/с в км/ч.", o: ["72 км/ч", "5.5 км/ч", "200 км/ч", "60 км/ч"], a: 0, h: "Умножьте на 3.6.", r: "20 &times; 3.6 = 72 км/ч." }
+            ]
+        }
+    };
+
+    let currentLang = 'en';
+
+    function switchLang(lang) {
+        currentLang = lang;
+        const data = translations[lang];
+        const container = document.getElementById('main-container');
+        
+        container.className = `container ${data.dir}`;
+        
+        document.getElementById('title').innerText = data.title;
+        document.getElementById('hist-title').innerText = data.histTitle;
+        document.getElementById('hist-desc').innerText = data.histDesc;
+        document.getElementById('triangle-title').innerText = data.triangleTitle;
+        document.getElementById('triangle-desc').innerText = data.triangleDesc;
+        document.getElementById('guide-title').innerText = data.guideTitle;
+        
+        document.querySelector('.text-d').innerText = data.triangleD;
+        document.querySelector('.text-s').innerText = data.triangleS;
+        document.querySelector('.text-t').innerText = data.triangleT;
+
+        document.getElementById('guide-d').innerHTML = data.guideD;
+        document.getElementById('guide-s').innerHTML = data.guideS;
+        document.getElementById('guide-t').innerHTML = data.guideT;
+
+        document.getElementById('conv-title').innerHTML = data.convTitle;
+        document.getElementById('conv-desc').innerHTML = data.convDesc;
+        document.getElementById('conv-rule1').innerHTML = data.convRule1;
+        document.getElementById('conv-rule2').innerHTML = data.convRule2;
+        document.getElementById('conv-shortcut').innerHTML = data.convShortcut;
+        document.getElementById('conv-to-ms').innerHTML = data.convToMs;
+        document.getElementById('conv-to-kmh').innerHTML = data.convToKmh;
+
+        document.getElementById('calc-title').innerText = data.calcTitle;
+        document.getElementById('calc-instruction').innerText = data.calcInstruction;
+        document.getElementById('lbl-d').innerText = data.lblD;
+        document.getElementById('lbl-s').innerText = data.lblS;
+        document.getElementById('lbl-t').innerText = data.lblT;
+        document.getElementById('btn-calculate').innerText = data.btnCalc;
+        document.getElementById('result').innerText = '';
+
+        document.getElementById('quiz-title').innerText = data.quizTitle;
+        document.getElementById('btn-submit-quiz').innerText = data.btnSubmitQuiz;
+        document.getElementById('quiz-summary').innerText = '';
+
+        renderQuiz();
+    }
+
+    function renderQuiz() {
+        const container = document.getElementById('quiz-container');
+        container.innerHTML = '';
+        const data = translations[currentLang];
+
+        data.questions.forEach((qObj, qIdx) => {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'quiz-item';
+
+            const questionText = document.createElement('p');
+            questionText.innerHTML = `<strong>${qIdx + 1}.</strong> ${qObj.q}`;
+            itemDiv.appendChild(questionText);
+
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'options-container';
+
+            qObj.o.forEach((opt, oIdx) => {
+                const label = document.createElement('label');
+                label.className = 'option-label';
+                label.id = `label-q${qIdx}-o${oIdx}`;
+
+                const radio = document.createElement('input');
+                radio.type = 'radio';
+                radio.name = `question-${qIdx}`;
+                radio.value = oIdx;
+                radio.style.width = 'auto';
+
+                label.appendChild(radio);
+                
+                const optSpan = document.createElement('span');
+                optSpan.innerHTML = opt;
+                label.appendChild(optSpan);
+
+                optionsDiv.appendChild(label);
+            });
+
+            itemDiv.appendChild(optionsDiv);
+
+            const actionRow = document.createElement('div');
+            actionRow.style.marginTop = '12px';
+
+            const checkBtn = document.createElement('button');
+            checkBtn.className = 'check-btn';
+            checkBtn.innerText = data.btnCheck;
+            checkBtn.onclick = () => checkSingleQuestion(qIdx, qObj.a, qObj.r);
+            actionRow.appendChild(checkBtn);
+
+            const hintBtn = document.createElement('button');
+            hintBtn.className = 'hint-btn';
+            hintBtn.innerText = data.showHint;
+            hintBtn.onclick = () => {
+                const hText = document.getElementById(`hint-text-${qIdx}`);
+                hText.style.display = hText.style.display === 'block' ? 'none' : 'block';
+            };
+            actionRow.appendChild(hintBtn);
+            itemDiv.appendChild(actionRow);
+
+            const hintText = document.createElement('div');
+            hintText.id = `hint-text-${qIdx}`;
+            hintText.className = 'hint-text';
+            hintText.innerText = qObj.h;
+            itemDiv.appendChild(hintText);
+
+            const feedbackBox = document.createElement('div');
+            feedbackBox.id = `feedback-box-${qIdx}`;
+            feedbackBox.className = 'feedback-box';
+            itemDiv.appendChild(feedbackBox);
+
+            container.appendChild(itemDiv);
+        });
+    }
+
+    function checkSingleQuestion(qIdx, correctIdx, explanationText) {
+        const radios = document.getElementsByName(`question-${qIdx}`);
+        const data = translations[currentLang];
+        const feedbackBox = document.getElementById(`feedback-box-${qIdx}`);
+        let selectedIdx = -1;
+        
+        for (let i = 0; i < radios.length; i++) {
+            const lbl = document.getElementById(`label-q${qIdx}-o${i}`);
+            lbl.classList.remove('correct-ans', 'wrong-ans');
+            if (radios[i].checked) {
+                selectedIdx = i;
+            }
+        }
+
+        const correctLbl = document.getElementById(`label-q${qIdx}-o${correctIdx}`);
+        correctLbl.classList.add('correct-ans');
+
+        feedbackBox.style.display = 'block';
+
+        if (selectedIdx === -1) {
+            feedbackBox.className = 'feedback-box feedback-wrong';
+            feedbackBox.innerHTML = `<strong>${data.wrongBadge}</strong><br>${explanationText}`;
+        } else if (selectedIdx === correctIdx) {
+            feedbackBox.className = 'feedback-box feedback-correct';
+            feedbackBox.innerHTML = `<strong>${data.correctBadge}</strong><br>${explanationText}`;
+        } else {
+            const wrongLbl = document.getElementById(`label-q${qIdx}-o${selectedIdx}`);
+            wrongLbl.classList.add('wrong-ans');
+            feedbackBox.className = 'feedback-box feedback-wrong';
+            feedbackBox.innerHTML = `<strong>${data.wrongBadge}</strong><br>${explanationText}`;
+        }
+    }
+
+    function evaluateQuiz() {
+        const data = translations[currentLang];
+        let score = 0;
+
+        data.questions.forEach((qObj, qIdx) => {
+            const radios = document.getElementsByName(`question-${qIdx}`);
+            const feedbackBox = document.getElementById(`feedback-box-${qIdx}`);
+            let selectedIdx = -1;
+            
+            for (let i = 0; i < radios.length; i++) {
+                const lbl = document.getElementById(`label-q${qIdx}-o${i}`);
+                lbl.classList.remove('correct-ans', 'wrong-ans');
+                if (radios[i].checked) {
+                    selectedIdx = i;
+                }
+            }
+
+            const correctLbl = document.getElementById(`label-q${qIdx}-o${qObj.a}`);
+            correctLbl.classList.add('correct-ans');
+            feedbackBox.style.display = 'block';
+
+            if (selectedIdx === qObj.a) {
+                score++;
+                feedbackBox.className = 'feedback-box feedback-correct';
+                feedbackBox.innerHTML = `<strong>${data.correctBadge}</strong><br>${qObj.r}`;
+            } else {
+                if (selectedIdx !== -1) {
+                    const wrongLbl = document.getElementById(`label-q${qIdx}-o${selectedIdx}`);
+                    wrongLbl.classList.add('wrong-ans');
+                }
+                feedbackBox.className = 'feedback-box feedback-wrong';
+                feedbackBox.innerHTML = `<strong>${data.wrongBadge}</strong><br>${qObj.r}`;
+            }
+        });
+
+        const summaryDiv = document.getElementById('quiz-summary');
+        summaryDiv.innerText = `${data.scoreText} ${score} / ${data.questions.length}`;
+        summaryDiv.style.color = score >= 14 ? '#27ae60' : '#e74c3c';
+        summaryDiv.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function calculateDST() {
+        const dVal = document.getElementById('input-d').value;
+        const sVal = document.getElementById('input-s').value;
+        const tVal = document.getElementById('input-t').value;
+        const resDiv = document.getElementById('result');
+        const data = translations[currentLang];
+
+        let emptyCount = 0;
+        if (dVal === "") emptyCount++;
+        if (sVal === "") emptyCount++;
+        if (tVal === "") emptyCount++;
+
+        if (emptyCount !== 1) {
+            resDiv.style.color = 'red';
+            resDiv.innerText = data.errFill;
+            return;
+        }
+
+        resDiv.style.color = '#27ae60';
+        
+        if (dVal === "") {
+            let d = parseFloat(sVal) * parseFloat(tVal);
+            resDiv.innerHTML = data.resD + `<span class="unit-fix">${d.toFixed(2)}${data.unitD}</span>`;
+        } else if (sVal === "") {
+            let s = parseFloat(dVal) / parseFloat(tVal);
+            resDiv.innerHTML = data.resS + `<span class="unit-fix">${s.toFixed(2)}${data.unitS}</span>`;
+        } else if (tVal === "") {
+            let t = parseFloat(dVal) / parseFloat(sVal);
+            resDiv.innerHTML = data.resT + `<span class="unit-fix">${t.toFixed(2)}${data.unitT}</span>`;
+        }
+    }
+
+    window.onload = () => {
+        renderQuiz();
+    };
+</script>
+
+</body>
+</html>
